@@ -5,10 +5,33 @@ function crand()
 	return 1+rnd(126)
 end
 
+function paleta()
+	local paletas = {
+	 	-- azules
+		{1,7,12,13},
+		-- verdes
+		{3,11,10}, 
+		-- azules y verdes
+		{1,7,12,3,11,10},
+		-- rojos
+		{8,8,9,10},
+		-- multicolor
+		{8,9,10,11,12,13,14,15},
+	}
+
+	return paletas[flr(rnd(#paletas))+1]
+end
+
+function color(paleta)
+	local p = flr(rnd(#paleta))+1
+	return paleta[p]
+end
+
 function dibujar(x,y)
 	local n = rnd(94)+5
 	local rango1 = rnd(100)
 	local rango2 = rnd(100)
+	local paleta = paleta()
 
 	if (rango1 > rango2) then
 		local aux
@@ -20,13 +43,13 @@ function dibujar(x,y)
 	for i=0,n do
 		local forma = rnd(100)
 		if (forma < rango1) then
-			circfill(crand(), crand(), rnd(4), rnd(8)+8)
+			circfill(crand(), crand(), rnd(4), color(paleta))
 		end
 		if (forma >= rango1 and forma < rango2) then
-			line(crand(), crand(), crand(), crand(), rnd(8)+8)
+			line(crand(), crand(), crand(), crand(), color(paleta))
 		end
 		if (forma >= rango2) then
-			rect(crand(), crand(), crand(), crand(), rnd(8)+8)
+			rect(crand(), crand(), crand(), crand(), color(paleta))
 		end
 	end
 end
