@@ -1,8 +1,9 @@
 pico-8 cartridge // http://www.pico-8.com
 version 8
 __lua__
-figuras = {}
-
+-- generan una coordenadas random 
+-- para el cuarto cuadrante,
+-- que es donde nos vamos a mover
 function xrand()
 	return 1+rnd(64)
 end
@@ -11,7 +12,9 @@ function yrand()
 	return 64+rnd(64)
 end
 
-function paleta()
+-- selecciona una paleta de colores
+-- al azar
+function escogerpaleta()
 	local paletas = {
 	 	-- azules
 		{1,7,12,13},
@@ -28,23 +31,32 @@ function paleta()
 	return paletas[flr(rnd(#paletas))+1]
 end
 
-function color(paleta)
+-- escoge un color al azar
+-- de la paleta dada
+function escogercolor(paleta)
 	local p = flr(rnd(#paleta))+1
 	return paleta[p]
 end
 
-function nuevo()
+-- modifica el array de figuras
+-- añadiendo y eliminando elementos
+-- aleatoriamente
+function nuevo(borrartodo)
 	local n = rnd(5)
 	local rango1 = rnd(100)
 	local rango2 = rnd(100)
-	local paleta = paleta()
 	local nborrar = rnd(5)
 	local b
 
-	if (nborrar < #figuras) then
-		for i=0,nborrar do
-			b = flr(rnd(#figuras))
-			del(figuras,figuras[b])
+	if (borrartodo) then 
+		figuras = {}
+		paleta = escogerpaleta()
+	else
+		if (nborrar < #figuras) then
+			for i=0,nborrar do
+				b = flr(rnd(#figuras))
+				del(figuras,figuras[b])
+			end
 		end
 	end
 
@@ -58,15 +70,17 @@ function nuevo()
 	for i=0,n do
 		local forma = rnd(100)
 		local f;
+		-- círculo
 		if (forma < rango1) then
 			f = {
 				t = 'circfill',
 				x0 = xrand(),
 				y0 = yrand(),
 				r = rnd(4),
-				c = color(paleta)
+				c = escogercolor(paleta)
 			}
 		end
+		-- línea
 		if (forma >= rango1 and forma < rango2) then
 			f = {
 				t = 'line',
@@ -74,9 +88,10 @@ function nuevo()
 				y0 = yrand(),
 				x1 = xrand(),
 				y1 = yrand(),
-				c = color(paleta)
+				c = escogercolor(paleta)
 			}
 		end
+		-- rectángulo
 		if (forma >= rango2) then
 			f = {
 				t = 'rect',
@@ -84,7 +99,7 @@ function nuevo()
 				y0 = yrand(),
 				x1 = xrand(),
 				y1 = yrand(),
-				c = color(paleta)
+				c = escogercolor(paleta)
 			}
 		end
 
@@ -92,6 +107,7 @@ function nuevo()
 	end
 end
 
+-- dibuja las figuras del array
 function dibujar(x,y)
 	for f in all(figuras) do
 		if (f.t == 'circfill') then
@@ -106,6 +122,8 @@ function dibujar(x,y)
 	end	
 end
 
+-- modifica ligeramente la posición
+-- de las figuras
 function mover()
 	local nf
 	for i,f in pairs(figuras) do
@@ -130,6 +148,8 @@ function mover()
 	end	
 end
 
+-- crea imágenes en espejo de lo dibujado
+-- en el cuarto cuadrante
 function proyectar()
 	for x=0,128 do
 		for y=0,128 do
@@ -146,13 +166,19 @@ end
 
 function _init()
 	t = 0
+	figuras = {}
+	paleta = escogerpaleta()
 	nuevo()
 end
 
 function _update()
-	if (t == 100) then
-		nuevo()
+	if (t == 10) then
+		nuevo(true)
 		t = 0
+	else 
+		if (t%100 == 0) then
+			nuevo()
+		end
 	end
 	t+=1;
 	mover()
