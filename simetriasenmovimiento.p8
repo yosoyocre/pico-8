@@ -1,6 +1,20 @@
 pico-8 cartridge // http://www.pico-8.com
 version 8
 __lua__
+-- variables globales 
+paletas = {
+ 	-- azules
+	{1,7,12,13},
+	-- verdes
+	{3,11,10}, 
+	-- azules y verdes
+	{1,7,12,3,11,10},
+	-- rojos
+	{8,8,9,10},
+	-- multicolor
+	{8,9,10,11,12,13,14,15},
+}
+
 -- generan una coordenadas random 
 -- para el cuarto cuadrante,
 -- que es donde nos vamos a mover
@@ -12,22 +26,28 @@ function yrand()
 	return 64+rnd(64)
 end
 
+-- genera velocidades random
+function vrand(v)
+	return min(1, max(-1, v + rnd(1) -0.5))
+end
+
+function calcularp(p, v, mi, ma)
+	p2 = max(min(p + v, ma), mi)
+
+	return p2
+end
+
+function calculax(x, v)
+	return calcularp(x, v, 0, 64)
+end
+
+function calculay(y, v)
+	return calcularp(y, v, 64, 128)
+end
+
 -- selecciona una paleta de colores
 -- al azar
 function escogerpaleta()
-	local paletas = {
-	 	-- azules
-		{1,7,12,13},
-		-- verdes
-		{3,11,10}, 
-		-- azules y verdes
-		{1,7,12,3,11,10},
-		-- rojos
-		{8,8,9,10},
-		-- multicolor
-		{8,9,10,11,12,13,14,15},
-	}
-
 	return paletas[flr(rnd(#paletas))+1]
 end
 
@@ -69,7 +89,7 @@ function nuevo(borrartodo)
 
 	for i=0,n do
 		local forma = rnd(100)
-		local f;
+		local f
 		-- círculo
 		if (forma < rango1) then
 			f = {
@@ -77,7 +97,9 @@ function nuevo(borrartodo)
 				x0 = xrand(),
 				y0 = yrand(),
 				r = rnd(4),
-				c = escogercolor(paleta)
+				c = escogercolor(paleta),
+				vx0 = 0,
+				vy0 = 0,
 			}
 		end
 		-- línea
@@ -88,7 +110,11 @@ function nuevo(borrartodo)
 				y0 = yrand(),
 				x1 = xrand(),
 				y1 = yrand(),
-				c = escogercolor(paleta)
+				c = escogercolor(paleta),
+				vx0 = 0,
+				vy0 = 0,
+				vx1 = 0,
+				vy1 = 0,
 			}
 		end
 		-- rectángulo
@@ -99,7 +125,11 @@ function nuevo(borrartodo)
 				y0 = yrand(),
 				x1 = xrand(),
 				y1 = yrand(),
-				c = escogercolor(paleta)
+				c = escogercolor(paleta),
+				vx0 = 0,
+				vy0 = 0,
+				vx1 = 0,
+				vy1 = 0,
 			}
 		end
 
@@ -127,23 +157,34 @@ end
 function mover()
 	local nf
 	for i,f in pairs(figuras) do
-		nf = f;
+		nf = f
 		if (nf.t == 'circfill') then
-			nf.x0+=(rnd(4)-2)
-			nf.y0+=(rnd(4)-2)
+			nf.x0 = calculax(nf.x0, nf.vx0)
+			nf.y0 = calculay(nf.y0, nf.vy0)
+			nf.vx0 = vrand(nf.vx0)
+			nf.vy0 = vrand(nf.vy0)
 		end
 		if (nf.t == 'line') then
-			nf.x0+=(rnd(4)-2)
-			nf.y0+=(rnd(4)-2)
-			nf.x1+=(rnd(4)-2)
-			nf.y1+=(rnd(4)-2)
+			nf.x0 = calculax(nf.x0, nf.vx0)
+			nf.y0 = calculay(nf.y0, nf.vy0)
+			nf.x1 = calculax(nf.x1, nf.vx1)
+			nf.y1 = calculay(nf.y1, nf.vy1)
+			nf.vx0 = vrand(nf.vx0)
+			nf.vy0 = vrand(nf.vy0)
+			nf.vx1 = vrand(nf.vx1)
+			nf.vy1 = vrand(nf.vy1)
 		end
 		if (nf.t == 'rect') then
-			nf.x0+=(rnd(4)-2)
-			nf.y0+=(rnd(4)-2)
-			nf.x1+=(rnd(4)-2)
-			nf.y1+=(rnd(4)-2)
+			nf.x0 = calculax(nf.x0, nf.vx0)
+			nf.y0 = calculay(nf.y0, nf.vy0)
+			nf.x1 = calculax(nf.x1, nf.vx1)
+			nf.y1 = calculay(nf.y1, nf.vy1)
+			nf.vx0 = vrand(nf.vx0)
+			nf.vy0 = vrand(nf.vy0)
+			nf.vx1 = vrand(nf.vx1)
+			nf.vy1 = vrand(nf.vy1)
 		end
+
 		figuras[i] = nf
 	end	
 end
@@ -172,7 +213,7 @@ function _init()
 end
 
 function _update()
-	if (t == 10) then
+	if (t == 1000) then
 		nuevo(true)
 		t = 0
 	else 
@@ -180,7 +221,7 @@ function _update()
 			nuevo()
 		end
 	end
-	t+=1;
+	t+=1
 	mover()
 end
 
