@@ -38,11 +38,11 @@ function calcularp(p, v, mi, ma)
 end
 
 function calculax(x, v)
-	return calcularp(x, v, 0, 64)
+	return calcularp(x, v, 1, 64)
 end
 
 function calculay(y, v)
-	return calcularp(y, v, 64, 128)
+	return calcularp(y, v, 64, 127)
 end
 
 -- selecciona una paleta de colores
